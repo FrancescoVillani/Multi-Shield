@@ -4,25 +4,48 @@ import open_clip
 from torchvision.transforms import ToPILImage
 import torch.nn.functional as F
 from ingredients.utilities import resize_cifar10_img
+import torchvision
+
+torchvision.disable_beta_transforms_warning()
 
 
-class ClipModel():
+class ClipModel:
 
-    def __init__(self, model_name, processor_name, tokenizer_name, use_open_clip, label_names, torch_preprocess,
-                 dataset, device):
+    def __init__(
+        self,
+        model_name,
+        processor_name,
+        tokenizer_name,
+        use_open_clip,
+        label_names,
+        torch_preprocess,
+        dataset,
+        device,
+    ):
 
-        self.instantiate_model(model_name, processor_name, tokenizer_name, use_open_clip, torch_preprocess)
+        self.instantiate_model(
+            model_name, processor_name, tokenizer_name, use_open_clip, torch_preprocess
+        )
         self.device = device
         self.model.to(self.device)
         self.dataset = dataset
         self.labels = label_names
         if dataset == "cifar10":
-            self.clip_labels = [f"this is a photo of a {label}" for label in self.labels]
+            self.clip_labels = [
+                f"this is a photo of a {label}" for label in self.labels
+            ]
         else:
             self.clip_labels = [f"photo of  a {label}" for label in self.labels]
         self.instantiate_label_embeddings()
 
-    def instantiate_model(self, model_name, processor_name, tokenizer_name, use_open_clip, torch_preprocess=None):
+    def instantiate_model(
+        self,
+        model_name,
+        processor_name,
+        tokenizer_name,
+        use_open_clip,
+        torch_preprocess=None,
+    ):
         if use_open_clip:
             model, _, processor = open_clip.create_model_and_transforms(model_name)
             model.eval()
@@ -49,10 +72,7 @@ class ClipModel():
             self.label_emb = text_features
         else:
             self.label_tokens = self.processor(
-                text=self.clip_labels,
-                padding=True,
-                images=None,
-                return_tensors='pt'
+                text=self.clip_labels, padding=True, images=None, return_tensors="pt"
             ).to(self.device)
 
             self.label_emb = self.model.get_text_features(**self.label_tokens)
@@ -79,16 +99,22 @@ class ClipModel():
     def create_img_emb(self, batch_image):
         if self.use_open_clip:
             if self.torch_processor is not None:
-                processed_images = torch.stack([self.torch_processor(img) for img in batch_image])
+                processed_images = torch.stack(
+                    [self.torch_processor(img) for img in batch_image]
+                )
             else:
                 to_pil = ToPILImage()
-                processed_images = torch.stack([self.processor(to_pil(img)) for img in batch_image])
+                processed_images = torch.stack(
+                    [self.processor(to_pil(img)) for img in batch_image]
+                )
 
             image = processed_images.to(self.device)
             image_features = self.model.encode_image(image)
             img_emb = F.normalize(image_features, dim=-1)
         else:
-            processed_images = torch.stack([self.torch_processor(img) for img in batch_image])
+            processed_images = torch.stack(
+                [self.torch_processor(img) for img in batch_image]
+            )
             if self.dataset == "cifar10":
                 resized_img = resize_cifar10_img(processed_images)
             else:
@@ -122,4 +148,6 @@ class ClipClassifier(torch.nn.Module):
 
     def forward(self, x):
         image_encoding = self.clip.create_img_emb(x)
-        return torch.abs(self.clip.cosine_similarity(image_encoding, self.clip.label_emb))
+        return torch.abs(
+            self.clip.cosine_similarity(image_encoding, self.clip.label_emb)
+        )

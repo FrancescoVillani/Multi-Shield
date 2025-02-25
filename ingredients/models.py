@@ -163,14 +163,14 @@ clipa_ViT_L = ClipModelConfig(
     use_open_clip=True
 )
 
-local_imagenet_models = {
+clip_models_dict = {
     'tangake_finetuned': tangake_finetuned_config.get_model,
     'clipa_ViT_L': clipa_ViT_L.get_model
 }
 
 
 def get_clip_model(config_name):
-    config_func = local_imagenet_models.get(config_name)
+    config_func = clip_models_dict.get(config_name)
     if config_func:
         return config_func()
     else:
