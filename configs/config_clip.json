@@ -1,12 +1,16 @@
 {
-    "seed": 1233,
-    "experiments": [
-        {
-            "clip_model_id":"tangake_finetuned",
-            "dataset": "cifar10",
-            "model": "carmon2019",
-            "n_samples": 4,
-            "batch_size": 2
-        }
-    ]
+  "seed": 1233,
+  "experiments": [
+    {
+      "clip_model_id": "tangake_finetuned",
+      "dataset": "cifar10",
+      "model_name": "carmon2019",
+      "n_samples": 3,
+      "batch_size": 2,
+      "attack_parameters": {
+        "device": "cpu",
+        "epsilon": 50
+      }
+    }
+  ]
 }
