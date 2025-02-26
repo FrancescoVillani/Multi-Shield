@@ -54,6 +54,7 @@ def run_attack(
 
     true_labels, pred_labels_adv = [], []
     all_inputs, all_adv_examples = [], []
+    linf_norms = []  # To store L∞ norm for each sample's perturbation
     times = []
 
     for i, (inputs, labels) in enumerate(tqdm(loader, ncols=80, total=loader_length)):
@@ -94,6 +95,12 @@ def run_attack(
             )
             adv_inputs.clamp_(min=0, max=1)
 
+        # Calculate the L∞ norm of the perturbation for each sample
+        perturbation = adv_inputs - inputs
+        # Reshape to (batch_size, -1) and take the max absolute difference for each sample
+        linf_norm_batch = perturbation.view(perturbation.size(0), -1).abs().max(dim=1)[0]
+        linf_norms.append(linf_norm_batch.cpu().tolist())
+
         adv_logits = model(adv_inputs)
         adv_pred = adv_logits.argmax(dim=1)
         pred_labels_adv.append(adv_pred.cpu().tolist())
@@ -103,6 +110,7 @@ def run_attack(
         "true_labels": [item for sublist in true_labels for item in sublist],
         "pred_labels_adv": [item for sublist in pred_labels_adv for item in sublist],
         "times": times,
+        "linf_norms": np.mean([norm for sublist in linf_norms for norm in sublist])
     }
 
     if len(all_inputs) > 1:
@@ -226,6 +234,7 @@ def resize_cifar10_img(batch_tensor):
         resized_images.append(resized_image.permute(2, 0, 1))
 
     return torch.stack(resized_images)
+
 
 class GrayscaleToRGB(object):
     def __call__(self, img):

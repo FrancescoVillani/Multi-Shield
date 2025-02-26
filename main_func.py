@@ -29,7 +29,7 @@ def read_config_file(config_file_path):
 
 def auto_attack(model, image, label, device, epsilon=None, verbose=False):
     if epsilon is None:
-        epsilon = 8 / 255
+        epsilon = 8
     x_test, y_test = image, label
     adversary = AutoAttack(
         model,
@@ -50,7 +50,7 @@ def auto_attack_with_rejection(
     model, image, label, device, rejection_class_index, epsilon=None
 ):
     if epsilon is None:
-        epsilon = 8 / 255
+        epsilon = 8
     x_test, y_test = image, label
     adversary = AutoAttack(
         model,
@@ -94,9 +94,13 @@ def forward_phase():
 
         clip_model_id = experiment["clip_model_id"]
         dataset = experiment["dataset"]
-        model_name = experiment["model"]
+        model_name = experiment["model_name"]
         batch_size = experiment["batch_size"]
         n_samples = experiment["n_samples"]
+
+        images_normalize = transforms.Normalize(
+            (0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)
+        )
 
         label_names = get_label_names(dataset)
         rejection_class_index = len(label_names)
@@ -106,13 +110,9 @@ def forward_phase():
             n_examples=n_samples,
             seed=config_data["seed"],
         )
-        model = get_local_model(model_name, dataset)
+        model = get_local_model(model_name, dataset, images_normalize)
         model.eval()
         model = model.to(device)
-
-        images_normalize = transforms.Normalize(
-            (0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)
-        )
 
         clip_model_name, processor_name, tokenizer_name, use_open_clip = get_clip_model(
             clip_model_id

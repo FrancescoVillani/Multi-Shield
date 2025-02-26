@@ -34,7 +34,7 @@ def auto_attack(
     label,
     device,
     adaptive=False,
-    rejection_class_index=-1,
+    rejection_class_index=0,
     epsilon=None,
     verbose=False,
 ):
@@ -75,7 +75,7 @@ def main():
     config = read_config(args.config)
     device = torch.device(args.device)
     print(f"Running on {device}")
-    use_wandb = True
+    use_wandb = False
     if use_wandb:
         wandb.init(project="multishield-experiments", config=config)
 
@@ -90,17 +90,18 @@ def main():
         attack_parameters = exp["attack_parameters"]
         attack_parameters["device"] = device
 
+        images_normalize = transforms.Normalize(
+            (0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)
+        )
+
         label_names = get_label_names(dataset)
         rejection_class = len(label_names)
         dataloaders = get_dataset_loaders(
             dataset, batch_size, n_samples, config["seed"]
         )
-        model = get_local_model(model_name, dataset).eval().to(device)
+        model = get_local_model(model_name, dataset, images_normalize).eval().to(device)
         clip_model_name, processor_name, tokenizer_name, use_open_clip = get_clip_model(
             clip_model_id
-        )
-        images_normalize = transforms.Normalize(
-            (0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)
         )
         clip_model = ClipModel(
             clip_model_name,
@@ -112,8 +113,9 @@ def main():
             dataset=dataset,
             device=device,
         )
-        multi_shield = MultiShield(dnn=model, clip_model=clip_model, dataset=dataset)
+        multi_shield = MultiShield(dnn=model, clip_model=clip_model)
         # PRIMA ATTACCHIAMO DNN BASELINE DA SOLA
+        print("Performing the attack against the classified standalone")
         dnn_adv_results = run_attack(
             model, dataloaders["val"], partial(auto_attack, **attack_parameters)
         )
@@ -127,8 +129,10 @@ def main():
             shuffle=False,
         )
         # FA LA VALUTAZIONE DELLA DNN CON IL ADVERSARIAL DATALOADER SU DNN
+        print("Evaluating the standalone classifier")
         dnn_acc = run_predictions(model, dataloaders["val"], adv_loader_dnn)
         # FA LA VALUTAZIONE DI MULTISHIELD CON IL ADVERSARIAL DATALOADER SU DNN
+        print("Evaluating Multi-Shield")
         ms_acc_on_dnn_adv = run_predictions(
             multi_shield, dataloaders["val"], adv_loader_dnn, rejection_class
         )
@@ -138,6 +142,7 @@ def main():
                 "rejection_class_index": rejection_class,
             }
         )
+        print("Running adaptive attack on Multi-Shield")
         ms_adv_results = run_attack(
             multi_shield,
             dataloaders["val"],
@@ -154,6 +159,7 @@ def main():
             batch_size=batch_size,
             shuffle=False,
         )
+        print("Evaluating Multi-Shield against the adaptive attack")
         ms_acc = run_predictions(
             multi_shield, dataloaders["val"], adv_loader_ms, rejection_class
         )
@@ -179,8 +185,8 @@ def main():
             "MS Robust Accuracy (Adaptive)": ms_acc["adv_accuracy"],
             "MS Rejection Ratio (Adaptive)": ms_acc["rejection_ratio_on_adv_examples"],
             "CLIP Accuracy": compute_clip_accuracy(clip_preds),
+            "linf": dnn_adv_results["linf_norms"]
         }
-
         print("\nResults:")
         for k, v in results.items():
             print(f"{k}: {v:.4f}")

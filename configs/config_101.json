@@ -4,9 +4,9 @@
     {
       "clip_model_id": "clipa_ViT_L",
       "dataset": "caltech101",
-      "model_name": "carmon2019",
-      "n_samples": 500,
-      "batch_size": 16,
+      "model_name": "caltech101_resnet18",
+      "n_samples": 50,
+      "batch_size": 2,
       "attack_parameters": {
         "epsilon": 50
       }

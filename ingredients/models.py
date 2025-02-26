@@ -1,6 +1,19 @@
 from functools import partial
+import torch
 from torch import nn
 from robustbench import load_model
+
+import torchvision
+
+class WrapperModelNormalize(nn.Module):
+    def __init__(self, model, torch_preprocess):
+        super().__init__()
+        self.model = model
+        self.torch_preprocess = torch_preprocess
+
+    def forward(self, x):
+        x = self.torch_preprocess(x)
+        return self.model(x)
 
 carmon_2019 = {
     'name': 'Carmon2019Unlabeled',
@@ -129,13 +142,48 @@ _local_imagenet_models = {
                        threat_model=liu2023['threat_model'])
 }
 
+caltech101_resnet18 = {
+    'path': "./pretrained_models/resnet18.model_seed=1123.dataset=caltech101.dataset_seed=1233.pth",
+    'model_type': torchvision.models.resnet18,
+    'new_num_classes': 101
+}
 
-def get_local_model(name: str, dataset: str) -> nn.Module:
+
+def load_local_model(path: str, model_type: str, new_num_classes: int = None, torch_preprocess: torchvision.transforms.Normalize = None) -> nn.Module:
+    model = model_type(pretrained=True)
+    if new_num_classes is not None:
+        num_features = model.fc.in_features
+        model.fc = torch.nn.Linear(num_features, new_num_classes)
+
+    state_dict = torch.load(path)
+    model.load_state_dict(state_dict, strict=False)
+
+    if torch_preprocess is not None:
+        original_forward = model.forward
+
+        def preprocess_forward(x, *args, **kwargs):
+            x = torch_preprocess(x)
+            return original_forward(x, *args, **kwargs)
+        
+        model.forward = preprocess_forward
+
+    return model.eval()
+
+_local_caltech101_models = {
+    "caltech101_resnet18": partial(load_local_model, path=caltech101_resnet18["path"],
+                                   model_type=caltech101_resnet18["model_type"],
+                                   new_num_classes=caltech101_resnet18["new_num_classes"])
+}
+
+
+def get_local_model(name: str, dataset: str, torch_preprocess: torchvision.transforms.Normalize = None) -> nn.Module:
     print(f"Loading {name}")
     if dataset == 'cifar10':
         return _local_cifar_models[name]()
     elif dataset == 'imagenet':
         return _local_imagenet_models[name]()
+    elif dataset == 'caltech101':
+        return _local_caltech101_models[name](torch_preprocess=torch_preprocess)
 
 
 class ClipModelConfig:

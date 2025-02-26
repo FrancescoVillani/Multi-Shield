@@ -12,8 +12,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 IMAGENET_TRAINING_PATH = "..\\..\\_datasets\\imagenet"
 
-CALTECH101_PATH = "/home/lazzaro/data/datasets"
-CALTECH101_SPLIT_PATH = "./configs/datasets/caltech101_train_test_split.seed=1233.json"
+CALTECH101_PATH = "./data/datasets"
+CALTECH101_SPLIT_PATH = "./ingredients/dataset_preprocessing/caltech101_train_test_split.seed=1233.json"
 
 
 def common_transform():
