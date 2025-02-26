@@ -4,3 +4,8 @@ checkpoints/
 .DS_Store
 robustbench_script.py
 cifar10_extraction.py
+
+wandb/
+*.pyc
+
+__pycache__/

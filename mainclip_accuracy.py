@@ -75,7 +75,7 @@ def main():
     config = read_config(args.config)
     device = torch.device(args.device)
     print(f"Running on {device}")
-    use_wandb = True
+    use_wandb = False
     if use_wandb:
         wandb.init(project="multishield-experiments", config=config)
 
@@ -95,7 +95,7 @@ def main():
         dataloaders = get_dataset_loaders(
             dataset, batch_size, n_samples, config["seed"]
         )
-        model = get_local_model(model_name, dataset).eval().to(device)
+        # model = get_local_model(model_name, dataset).eval().to(device)
         clip_model_name, processor_name, tokenizer_name, use_open_clip = get_clip_model(
             clip_model_id
         )
@@ -112,51 +112,51 @@ def main():
             dataset=dataset,
             device=device,
         )
-        multi_shield = MultiShield(dnn=model, clip_model=clip_model, dataset=dataset)
-        # PRIMA ATTACCHIAMO DNN BASELINE DA SOLA
-        dnn_adv_results = run_attack(
-            model, dataloaders["val"], partial(auto_attack, **attack_parameters)
-        )
-        # CREA UN DATALOADER ON GLI ADVERSARIAL EXAMPLES RITORNATI DALLA RUN_ATTACK
-        adv_loader_dnn = data_utils.DataLoader(
-            data_utils.TensorDataset(
-                dnn_adv_results["adv_examples"].clone().detach(),
-                torch.tensor(dnn_adv_results["true_labels"]),
-            ),
-            batch_size=batch_size,
-            shuffle=False,
-        )
-        # FA LA VALUTAZIONE DELLA DNN CON IL ADVERSARIAL DATALOADER SU DNN
-        dnn_acc = run_predictions(model, dataloaders["val"], adv_loader_dnn)
-        # FA LA VALUTAZIONE DI MULTISHIELD CON IL ADVERSARIAL DATALOADER SU DNN
-        ms_acc_on_dnn_adv = run_predictions(
-            multi_shield, dataloaders["val"], adv_loader_dnn, rejection_class
-        )
-        attack_parameters.update(
-            {
-                "adaptive": True,
-                "rejection_class_index": rejection_class,
-            }
-        )
-        ms_adv_results = run_attack(
-            multi_shield,
-            dataloaders["val"],
-            partial(
-                auto_attack,
-                **attack_parameters,
-            ),
-        )
-        adv_loader_ms = data_utils.DataLoader(
-            data_utils.TensorDataset(
-                ms_adv_results["adv_examples"].clone().detach(),
-                torch.tensor(ms_adv_results["true_labels"]),
-            ),
-            batch_size=batch_size,
-            shuffle=False,
-        )
-        ms_acc = run_predictions(
-            multi_shield, dataloaders["val"], adv_loader_ms, rejection_class
-        )
+        # multi_shield = MultiShield(dnn=model, clip_model=clip_model, dataset=dataset)
+        # # PRIMA ATTACCHIAMO DNN BASELINE DA SOLA
+        # dnn_adv_results = run_attack(
+        #     model, dataloaders["val"], partial(auto_attack, **attack_parameters)
+        # )
+        # # CREA UN DATALOADER ON GLI ADVERSARIAL EXAMPLES RITORNATI DALLA RUN_ATTACK
+        # adv_loader_dnn = data_utils.DataLoader(
+        #     data_utils.TensorDataset(
+        #         dnn_adv_results["adv_examples"].clone().detach(),
+        #         torch.tensor(dnn_adv_results["true_labels"]),
+        #     ),
+        #     batch_size=batch_size,
+        #     shuffle=False,
+        # )
+        # # FA LA VALUTAZIONE DELLA DNN CON IL ADVERSARIAL DATALOADER SU DNN
+        # dnn_acc = run_predictions(model, dataloaders["val"], adv_loader_dnn)
+        # # FA LA VALUTAZIONE DI MULTISHIELD CON IL ADVERSARIAL DATALOADER SU DNN
+        # ms_acc_on_dnn_adv = run_predictions(
+        #     multi_shield, dataloaders["val"], adv_loader_dnn, rejection_class
+        # )
+        # attack_parameters.update(
+        #     {
+        #         "adaptive": True,
+        #         "rejection_class_index": rejection_class,
+        #     }
+        # )
+        # ms_adv_results = run_attack(
+        #     multi_shield,
+        #     dataloaders["val"],
+        #     partial(
+        #         auto_attack,
+        #         **attack_parameters,
+        #     ),
+        # )
+        # adv_loader_ms = data_utils.DataLoader(
+        #     data_utils.TensorDataset(
+        #         ms_adv_results["adv_examples"].clone().detach(),
+        #         torch.tensor(ms_adv_results["true_labels"]),
+        #     ),
+        #     batch_size=batch_size,
+        #     shuffle=False,
+        # )
+        # ms_acc = run_predictions(
+        #     multi_shield, dataloaders["val"], adv_loader_ms, rejection_class
+        # )
         clip_preds = [
             clip_model.clip_prediction(
                 clip_model.create_img_emb(
@@ -168,16 +168,16 @@ def main():
         ]
 
         results = {
-            "DNN Clean Accuracy": dnn_acc["clean_accuracy"],
-            "DNN Robust Accuracy": dnn_acc["adv_accuracy"],
-            "MS Clean Accuracy": ms_acc["clean_accuracy"],
-            "MS Rejection Ratio": ms_acc["rejection_ratio_on_clean_samples"],
-            "MS Robust Accuracy (Non-Adaptive)": ms_acc_on_dnn_adv["adv_accuracy"],
-            "MS Rejection Ratio (Non-Adaptive)": ms_acc_on_dnn_adv[
-                "rejection_ratio_on_adv_examples"
-            ],
-            "MS Robust Accuracy (Adaptive)": ms_acc["adv_accuracy"],
-            "MS Rejection Ratio (Adaptive)": ms_acc["rejection_ratio_on_adv_examples"],
+            # "DNN Clean Accuracy": dnn_acc["clean_accuracy"],
+            # "DNN Robust Accuracy": dnn_acc["adv_accuracy"],
+            # "MS Clean Accuracy": ms_acc["clean_accuracy"],
+            # "MS Rejection Ratio": ms_acc["rejection_ratio_on_clean_samples"],
+            # "MS Robust Accuracy (Non-Adaptive)": ms_acc_on_dnn_adv["adv_accuracy"],
+            # "MS Rejection Ratio (Non-Adaptive)": ms_acc_on_dnn_adv[
+            #     "rejection_ratio_on_adv_examples"
+            # ],
+            # "MS Robust Accuracy (Adaptive)": ms_acc["adv_accuracy"],
+            # "MS Rejection Ratio (Adaptive)": ms_acc["rejection_ratio_on_adv_examples"],
             "CLIP Accuracy": compute_clip_accuracy(clip_preds),
         }
 

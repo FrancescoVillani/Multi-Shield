@@ -1,15 +1,19 @@
 import torch
 import torchvision
 import random
-from ingredients.utilities import set_seed
+from ingredients.utilities import set_seed, GrayscaleToRGB
 import torchvision.transforms as transforms
 import os
 import ssl
+import json
 
 torchvision.disable_beta_transforms_warning()
 ssl._create_default_https_context = ssl._create_unverified_context
 
 IMAGENET_TRAINING_PATH = "..\\..\\_datasets\\imagenet"
+
+CALTECH101_PATH = "/home/lazzaro/data/datasets"
+CALTECH101_SPLIT_PATH = "./configs/datasets/caltech101_train_test_split.seed=1233.json"
 
 
 def common_transform():
@@ -1033,6 +1037,110 @@ def get_label_names(dataset):
             "corn cob",
             "toilet paper",
         ]
+    elif dataset=="caltech101":
+        return [
+            'Faces',
+            'Faces_easy',
+            'Leopards',
+            'Motorbikes',
+            'accordion',
+            'airplanes',
+            'anchor',
+            'ant',
+            'barrel',
+            'bass',
+            'beaver',
+            'binocular',
+            'bonsai',
+            'brain',
+            'brontosaurus',
+            'buddha',
+            'butterfly',
+            'camera',
+            'cannon',
+            'car_side',
+            'ceiling_fan',
+            'cellphone',
+            'chair',
+            'chandelier',
+            'cougar_body',
+            'cougar_face',
+            'crab',
+            'crayfish',
+            'crocodile',
+            'crocodile_head',
+            'cup',
+            'dalmatian',
+            'dollar_bill',
+            'dolphin',
+            'dragonfly',
+            'electric_guitar',
+            'elephant',
+            'emu',
+            'euphonium',
+            'ewer',
+            'ferry',
+            'flamingo',
+            'flamingo_head',
+            'garfield',
+            'gerenuk',
+            'gramophone',
+            'grand_piano',
+            'hawksbill',
+            'headphone',
+            'hedgehog',
+            'helicopter',
+            'ibis',
+            'inline_skate',
+            'joshua_tree',
+            'kangaroo',
+            'ketch',
+            'lamp',
+            'laptop',
+            'llama',
+            'lobster',
+            'lotus',
+            'mandolin',
+            'mayfly',
+            'menorah',
+            'metronome',
+            'minaret',
+            'nautilus',
+            'octopus',
+            'okapi',
+            'pagoda',
+            'panda',
+            'pigeon',
+            'pizza',
+            'platypus',
+            'pyramid',
+            'revolver',
+            'rhino',
+            'rooster',
+            'saxophone',
+            'schooner',
+            'scissors',
+            'scorpion',
+            'sea_horse',
+            'snoopy',
+            'soccer_ball',
+            'stapler',
+            'starfish',
+            'stegosaurus',
+            'stop_sign',
+            'strawberry',
+            'sunflower',
+            'tick',
+            'trilobite',
+            'umbrella',
+            'watch',
+            'water_lilly',
+            'wheelchair',
+            'wild_cat',
+            'windsor_chair',
+            'wrench',
+            'yin_yang'
+        ]
 
 
 def get_dataset_loaders(dataset, batch_size, n_examples, seed):
@@ -1048,8 +1156,11 @@ def get_dataset_loaders(dataset, batch_size, n_examples, seed):
     elif dataset == "imagenet":
         print(f"Loading IMAGENET dataset with batch size {batch_size}")
         loaders = get_dataset_loader_imagenet(transform, batch_size, n_examples)
+    elif dataset == "caltech101":
+        print(f"Loading CALTECH101 dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_caltech101(batch_size, n_examples)
     else:
-        print("Please input a valid dataset (cifar10, imagenet)")
+        print("Please input a valid dataset (cifar10, imagenet, caltech101)")
 
     return loaders
 
@@ -1121,3 +1232,40 @@ def get_dataset_loader_imagenet(transform, batch_size, n_examples):
         )
     }
     return data_loader
+
+
+def get_dataset_loader_caltech101(batch_size: int, n_examples: int):
+    dataloaders = {}
+
+    if os.path.exists(CALTECH101_SPLIT_PATH):
+        with open(CALTECH101_SPLIT_PATH, "r") as f:
+            split_indices = json.load(f)
+            train_indices = split_indices["train"]
+            test_indices = split_indices["test"]
+    else:
+        raise FileNotFoundError(f"Split not defined in path: {CALTECH101_SPLIT_PATH}")
+
+    resized_transform = transforms.Compose([
+        # transforms.Lambda(lambda img: img.convert("RGB")),
+        transforms.Resize((224, 224)),
+        GrayscaleToRGB(),
+        transforms.ToTensor()
+    ])
+
+    caltech101_data = torchvision.datasets.Caltech101(root=CALTECH101_PATH, transform=resized_transform, download=False)
+
+    caltech101_train_data = torch.utils.data.Subset(caltech101_data, train_indices)
+
+    if n_examples == 0:
+        selected_test_indices = test_indices
+    else:
+        selected_test_indices = test_indices[:n_examples]
+
+    caltech101_test_data = torch.utils.data.Subset(caltech101_data, selected_test_indices)
+
+    dataloaders["train"] = torch.utils.data.DataLoader(caltech101_train_data, batch_size=batch_size, shuffle=True)
+    dataloaders["val"] = torch.utils.data.DataLoader(caltech101_test_data, batch_size=batch_size, shuffle=False)
+
+    dataloaders["class_names"] = caltech101_data.categories
+
+    return dataloaders

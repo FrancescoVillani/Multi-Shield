@@ -226,3 +226,9 @@ def resize_cifar10_img(batch_tensor):
         resized_images.append(resized_image.permute(2, 0, 1))
 
     return torch.stack(resized_images)
+
+class GrayscaleToRGB(object):
+    def __call__(self, img):
+        if img.mode == 'L':
+            img = img.convert("RGB")
+        return img
