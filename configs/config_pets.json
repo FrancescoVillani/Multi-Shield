@@ -1,0 +1,15 @@
+{
+  "seed": 1233,
+  "experiments": [
+    {
+      "clip_model_id": "clipa_ViT_L",
+      "dataset": "pets",
+      "model_name": "pets_resnet18",
+      "n_samples": 50,
+      "batch_size": 2,
+      "attack_parameters": {
+        "epsilon": 50
+      }
+    }
+  ]
+}

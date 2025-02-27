@@ -1258,9 +1258,46 @@ def get_label_names(dataset):
             'Tuna tartare',
             'Waffles'
         ]
-
-
-
+    elif dataset == "pets":
+        return [
+            'Abyssinian',
+            'American Bulldog',
+            'American Pit Bull Terrier',
+            'Basset Hound',
+            'Beagle',
+            'Bengal',
+            'Birman',
+            'Bombay',
+            'Boxer',
+            'British Shorthair',
+            'Chihuahua',
+            'Egyptian Mau',
+            'English Cocker Spaniel',
+            'English Setter',
+            'German Shorthaired',
+            'Great Pyrenees',
+            'Havanese',
+            'Japanese Chin',
+            'Keeshond',
+            'Leonberger',
+            'Maine Coon',
+            'Miniature Pinscher',
+            'Newfoundland',
+            'Persian',
+            'Pomeranian',
+            'Pug',
+            'Ragdoll',
+            'Russian Blue',
+            'Saint Bernard',
+            'Samoyed',
+            'Scottish Terrier',
+            'Shiba Inu',
+            'Siamese',
+            'Sphynx',
+            'Staffordshire Bull Terrier',
+            'Wheaten Terrier',
+            'Yorkshire Terrier'
+        ]
 
 
 def get_dataset_loader_cifar10(batch_size: int, n_examples: int):
@@ -1290,19 +1327,7 @@ def get_dataset_loader_cifar10(batch_size: int, n_examples: int):
         image_datasets["val"], batch_size=batch_size, shuffle=False, num_workers=2
     )
 
-    class_names = [
-        "airplane",
-        "automobile",
-        "bird",
-        "cat",
-        "deer",
-        "dog",
-        "frog",
-        "horse",
-        "ship",
-        "truck",
-    ]
-    dataloaders["class_names"] = class_names
+    dataloaders["class_names"] = get_label_names("cifar10")
 
     torch.cuda.empty_cache()
     return dataloaders
@@ -1329,6 +1354,9 @@ def get_dataset_loader_imagenet(transform, batch_size, n_examples):
             dum, batch_size=batch_size, shuffle=False, num_workers=0
         )
     }
+
+    data_loader["class_names"] = get_label_names("imagenet")
+
     return data_loader
 
 
@@ -1364,7 +1392,7 @@ def get_dataset_loader_caltech101(batch_size: int, n_examples: int):
     dataloaders["train"] = torch.utils.data.DataLoader(caltech101_train_data, batch_size=batch_size, shuffle=True)
     dataloaders["val"] = torch.utils.data.DataLoader(caltech101_test_data, batch_size=batch_size, shuffle=False)
 
-    dataloaders["class_names"] = caltech101_data.categories
+    dataloaders["class_names"] = get_label_names("caltech101")
 
     return dataloaders
 
@@ -1399,18 +1427,7 @@ def get_dataset_loader_stl10(batch_size: int, n_examples: int):
         image_datasets["val"], batch_size=batch_size, shuffle=False, num_workers=2
     )
 
-    class_names = [
-        'airplane',
-        'bird',
-        'car',
-        'cat',
-        'deer',
-        'dog',
-        'horse',
-        'monkey',
-        'ship',
-        'truck']
-    dataloaders["class_names"] = class_names
+    dataloaders["class_names"] = get_label_names("stl10")
 
     torch.cuda.empty_cache()
     return dataloaders
@@ -1446,109 +1463,43 @@ def get_dataset_loader_food101(batch_size: int, n_examples: int):
         image_datasets["val"], batch_size=batch_size, shuffle=False, num_workers=2
     )
 
-    class_names = [
-        'Apple pie',
-        'Baby back ribs',
-        'Baklava',
-        'Beef carpaccio',
-        'Beef tartare',
-        'Beet salad',
-        'Beignets',
-        'Bibimbap',
-        'Bread pudding',
-        'Breakfast burrito',
-        'Bruschetta',
-        'Caesar salad',
-        'Cannoli',
-        'Caprese salad',
-        'Carrot cake',
-        'Ceviche',
-        'Cheesecake',
-        'Cheese plate',
-        'Chicken curry',
-        'Chicken quesadilla',
-        'Chicken wings',
-        'Chocolate cake',
-        'Chocolate mousse',
-        'Churros',
-        'Clam chowder',
-        'Club sandwich',
-        'Crab cakes',
-        'Creme brulee',
-        'Croque madame',
-        'Cup cakes',
-        'Deviled eggs',
-        'Donuts',
-        'Dumplings',
-        'Edamame',
-        'Eggs benedict',
-        'Escargots',
-        'Falafel',
-        'Filet mignon',
-        'Fish and chips',
-        'Foie gras',
-        'French fries',
-        'French onion soup',
-        'French toast',
-        'Fried calamari',
-        'Fried rice',
-        'Frozen yogurt',
-        'Garlic bread',
-        'Gnocchi',
-        'Greek salad',
-        'Grilled cheese sandwich',
-        'Grilled salmon',
-        'Guacamole',
-        'Gyoza',
-        'Hamburger',
-        'Hot and sour soup',
-        'Hot dog',
-        'Huevos rancheros',
-        'Hummus',
-        'Ice cream',
-        'Lasagna',
-        'Lobster bisque',
-        'Lobster roll sandwich',
-        'Macaroni and cheese',
-        'Macarons',
-        'Miso soup',
-        'Mussels',
-        'Nachos',
-        'Omelette',
-        'Onion rings',
-        'Oysters',
-        'Pad thai',
-        'Paella',
-        'Pancakes',
-        'Panna cotta',
-        'Peking duck',
-        'Pho',
-        'Pizza',
-        'Pork chop',
-        'Poutine',
-        'Prime rib',
-        'Pulled pork sandwich',
-        'Ramen',
-        'Ravioli',
-        'Red velvet cake',
-        'Risotto',
-        'Samosa',
-        'Sashimi',
-        'Scallops',
-        'Seaweed salad',
-        'Shrimp and grits',
-        'Spaghetti bolognese',
-        'Spaghetti carbonara',
-        'Spring rolls',
-        'Steak',
-        'Strawberry shortcake',
-        'Sushi',
-        'Tacos',
-        'Takoyaki',
-        'Tiramisu',
-        'Tuna tartare',
-        'Waffles']
-    dataloaders["class_names"] = class_names
+    dataloaders["class_names"] = get_label_names("food101")
+
+    torch.cuda.empty_cache()
+    return dataloaders
+
+
+def get_dataset_loader_pets(batch_size: int, n_examples: int):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
+
+    image_datasets = {}
+    dataloaders = {}
+    image_datasets["train"] = torchvision.datasets.OxfordIIITPet(
+        root="./data/datasets/", split="trainval", download=True, transform=transform
+    )
+    dataloaders["train"] = torch.utils.data.DataLoader(
+        image_datasets["train"], batch_size=batch_size, shuffle=True, num_workers=2
+    )
+
+    image_datasets["val"] = torchvision.datasets.OxfordIIITPet(
+        root="./data/datasets/", split="test", download=True, transform=transform
+    )
+    print(f"whole length of the validation set is: {len(image_datasets['val'])}")
+
+    if n_examples > 0:
+        image_datasets["val"] = torch.utils.data.Subset(
+            image_datasets["val"],
+            random.sample(range(1, len(image_datasets["val"])), n_examples),
+        )
+
+    dataloaders["val"] = torch.utils.data.DataLoader(
+        image_datasets["val"], batch_size=batch_size, shuffle=False, num_workers=2
+    )
+
+    dataloaders["class_names"] = get_label_names("pets")
 
     torch.cuda.empty_cache()
     return dataloaders
@@ -1576,7 +1527,10 @@ def get_dataset_loaders(dataset, batch_size, n_examples, seed):
     elif dataset == "food101":
         print(f"Loading FOOD101 dataset with batch size {batch_size}")
         loaders = get_dataset_loader_food101(batch_size, n_examples)
+    elif dataset == "pets":
+        print(f"Loading PETS dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_pets(batch_size, n_examples)
     else:
-        print("Please input a valid dataset (cifar10, imagenet, caltech101, stl10, food101)")
+        print("Please input a valid dataset (cifar10, imagenet, caltech101, stl10, food101, pets)")
 
     return loaders

@@ -191,6 +191,34 @@ _local_stl10_models = {
                                    new_num_classes=stl10_resnet18["new_num_classes"])
 }
 
+# TO CHANGE MODEL
+food101_resnet18 = {
+    'path': "./pretrained_models/5_resnet18.model_seed=1123.dataset=food101.dataset_seed=1233.pth",
+    'model_type': torchvision.models.resnet18,
+    'new_num_classes': 101
+}
+
+
+_local_food101_models = {
+    "food101_resnet18": partial(load_local_model, path=food101_resnet18["path"],
+                                   model_type=food101_resnet18["model_type"],
+                                   new_num_classes=food101_resnet18["new_num_classes"])
+}
+
+
+pets_resnet18 = {
+    'path': "./pretrained_models/resnet18.model_seed=1123.dataset=pets.dataset_seed=1233.pth",
+    'model_type': torchvision.models.resnet18,
+    'new_num_classes': 37
+}
+
+
+_local_pets_models = {
+    "pets_resnet18": partial(load_local_model, path=pets_resnet18["path"],
+                                   model_type=pets_resnet18["model_type"],
+                                   new_num_classes=pets_resnet18["new_num_classes"])
+}
+
 
 def get_local_model(name: str, dataset: str, torch_preprocess: torchvision.transforms.Normalize = None) -> nn.Module:
     print(f"Loading {name}")
@@ -202,6 +230,10 @@ def get_local_model(name: str, dataset: str, torch_preprocess: torchvision.trans
         return _local_caltech101_models[name](torch_preprocess=torch_preprocess)
     elif dataset == 'stl10':
         return _local_stl10_models[name](torch_preprocess=torch_preprocess)
+    elif dataset == 'food101':
+        return _local_food101_models[name](torch_preprocess=torch_preprocess)
+    elif dataset == 'pets':
+        return _local_pets_models[name](torch_preprocess=torch_preprocess)
 
 
 class ClipModelConfig:

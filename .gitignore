@@ -8,4 +8,6 @@ cifar10_extraction.py
 wandb/
 *.pyc
 
+results/
+
 __pycache__/

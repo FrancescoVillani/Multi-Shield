@@ -72,7 +72,7 @@ def compute_clip_accuracy(clip_predictions):
 
 def initialize_experiment(exp, config, device):
     set_seed(config["seed"])
-    use_wandb = exp["use_wandb"]
+    use_wandb = config.get("use_wandb", False)
     if use_wandb:
         wandb.init(project="multishield-experiments", config=config)
 
