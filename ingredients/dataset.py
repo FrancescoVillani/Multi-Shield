@@ -1260,32 +1260,7 @@ def get_label_names(dataset):
         ]
 
 
-def get_dataset_loaders(dataset, batch_size, n_examples, seed):
-    set_seed(seed=seed)
-    transform = common_transform()
 
-    loaders = {}
-
-    if dataset == "cifar10":
-        print(f"Loading CIFAR10 dataset with batch size {batch_size}")
-        loaders = get_dataset_loader_cifar10(batch_size, n_examples)
-
-    elif dataset == "imagenet":
-        print(f"Loading IMAGENET dataset with batch size {batch_size}")
-        loaders = get_dataset_loader_imagenet(transform, batch_size, n_examples)
-    elif dataset == "caltech101":
-        print(f"Loading CALTECH101 dataset with batch size {batch_size}")
-        loaders = get_dataset_loader_caltech101(batch_size, n_examples)
-    elif dataset == "stl10":
-        print(f"Loading STL10 dataset with batch size {batch_size}")
-        loaders = get_dataset_loader_stl10(batch_size, n_examples)
-    elif dataset == "food101":
-        print(f"Loading FOOD101 dataset with batch size {batch_size}")
-        loaders = get_dataset_loader_food101(batch_size, n_examples)
-    else:
-        print("Please input a valid dataset (cifar10, imagenet, caltech101, stl10, food101)")
-
-    return loaders
 
 
 def get_dataset_loader_cifar10(batch_size: int, n_examples: int):
@@ -1308,7 +1283,7 @@ def get_dataset_loader_cifar10(batch_size: int, n_examples: int):
     if n_examples > 0:
         image_datasets["val"] = torch.utils.data.Subset(
             image_datasets["val"],
-            random.sample(range(1, len(image_datasets["val"])), n_examples),
+            random.sample(range(len(image_datasets["val"])), n_examples),
         )
 
     dataloaders["val"] = torch.utils.data.DataLoader(
@@ -1339,7 +1314,7 @@ def get_dataset_loader_imagenet(transform, batch_size, n_examples):
     imagenet_data = torchvision.datasets.ImageFolder(train_path, transform=transform)
 
     imagenet_data_subset = torch.utils.data.Subset(
-        imagenet_data, random.sample(range(1, len(imagenet_data)), n_examples)
+        imagenet_data, random.sample(range(len(imagenet_data)), n_examples)
     )
 
     resized_transform = transforms.Compose(
@@ -1417,7 +1392,7 @@ def get_dataset_loader_stl10(batch_size: int, n_examples: int):
     if n_examples > 0:
         image_datasets["val"] = torch.utils.data.Subset(
             image_datasets["val"],
-            random.sample(range(1, len(image_datasets["val"])), n_examples),
+            random.sample(range(len(image_datasets["val"])), n_examples),
         )
 
     dataloaders["val"] = torch.utils.data.DataLoader(
@@ -1577,3 +1552,31 @@ def get_dataset_loader_food101(batch_size: int, n_examples: int):
 
     torch.cuda.empty_cache()
     return dataloaders
+
+
+def get_dataset_loaders(dataset, batch_size, n_examples, seed):
+    set_seed(seed=seed)
+    transform = common_transform()
+
+    loaders = {}
+
+    if dataset == "cifar10":
+        print(f"Loading CIFAR10 dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_cifar10(batch_size, n_examples)
+
+    elif dataset == "imagenet":
+        print(f"Loading IMAGENET dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_imagenet(transform, batch_size, n_examples)
+    elif dataset == "caltech101":
+        print(f"Loading CALTECH101 dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_caltech101(batch_size, n_examples)
+    elif dataset == "stl10":
+        print(f"Loading STL10 dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_stl10(batch_size, n_examples)
+    elif dataset == "food101":
+        print(f"Loading FOOD101 dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_food101(batch_size, n_examples)
+    else:
+        print("Please input a valid dataset (cifar10, imagenet, caltech101, stl10, food101)")
+
+    return loaders

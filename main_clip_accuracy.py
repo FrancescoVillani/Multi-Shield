@@ -16,7 +16,7 @@ from ingredients.utilities import (
     run_attack,
     run_predictions,
     set_seed,
-    resize_cifar10_img,
+    resize_image_224,
 )
 import torchvision
 
@@ -160,7 +160,7 @@ def main():
         clip_preds = [
             clip_model.clip_prediction(
                 clip_model.create_img_emb(
-                    resize_cifar10_img(img) if dataset == "cifar10" else img
+                    resize_image_224(img) if dataset == "cifar10" else img
                 ),
                 label,
             )

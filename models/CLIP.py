@@ -3,7 +3,7 @@ import torch
 import open_clip
 from torchvision.transforms import ToPILImage
 import torch.nn.functional as F
-from ingredients.utilities import resize_cifar10_img
+from ingredients.utilities import resize_image_224
 import torchvision
 
 torchvision.disable_beta_transforms_warning()
@@ -116,7 +116,7 @@ class ClipModel:
                 [self.torch_processor(img) for img in batch_image]
             )
             if self.dataset == "cifar10":
-                resized_img = resize_cifar10_img(processed_images)
+                resized_img = resize_image_224(processed_images)
             else:
                 resized_img = processed_images
             img_emb = self.model.get_image_features(resized_img)

@@ -15,7 +15,7 @@ from ingredients.utilities import (
     run_attack,
     run_predictions,
     set_seed,
-    resize_cifar10_img,
+    resize_image_224,
 )
 import torch.utils.data as data_utils
 from functools import partial
@@ -186,7 +186,7 @@ def forward_phase():
             labels = labels.to(device)
 
             if dataset == "cifar10":
-                resized_img = resize_cifar10_img(inputs)
+                resized_img = resize_image_224(inputs)
             else:
                 resized_img = inputs
 

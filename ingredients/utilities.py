@@ -1,7 +1,3 @@
-import datetime
-import os
-import re
-import statistics
 import warnings
 import random
 import numpy as np
@@ -17,7 +13,8 @@ torchvision.disable_beta_transforms_warning()
 
 
 def set_seed(seed):
-    """Random seed generation for PyTorch. See https://pytorch.org/docs/stable/notes/randomness.html
+    """
+    Random seed generation for PyTorch. See https://pytorch.org/docs/stable/notes/randomness.html
         for further details.
     Args:
         seed (int): the seed for pseudonumber generation.
@@ -74,10 +71,7 @@ def run_attack(
         except Exception as e:
             adv_inputs = inputs
             if "out of memory" in str(e) or "valid cuDNN" in str(e):
-                print(
-                    "\n WARNING: ran out of memory, cannot perform this specific attack with this batch size"
-                )
-                exit()
+                raise RuntimeError("Out of memory error during attack execution.")
             else:
                 raise e
 
@@ -110,7 +104,7 @@ def run_attack(
         "true_labels": [item for sublist in true_labels for item in sublist],
         "pred_labels_adv": [item for sublist in pred_labels_adv for item in sublist],
         "times": times,
-        "linf_norms": np.mean([norm for sublist in linf_norms for norm in sublist])
+        "linf_norms": np.max([norm for sublist in linf_norms for norm in sublist])
     }
 
     if len(all_inputs) > 1:
@@ -216,22 +210,29 @@ def run_predictions(
     return data
 
 
-def resize_cifar10_img(batch_tensor):
+def resize_image_224(batch_tensor):
+    """
+    Resize a batch of CIFAR-10 images to 224x224 pixels.
+
+    Args:
+        batch_tensor (torch.Tensor): A batch of images with shape (batch_size, channels, height, width).
+
+    Returns:
+        torch.Tensor: A batch of resized images with shape (batch_size, channels, 224, 224).
+    """
     resized_images = []
 
     for image_tensor in batch_tensor:
-        image_tensor = image_tensor.permute(1, 2, 0)
-
         resized_image = F.interpolate(
-            image_tensor.unsqueeze(0).permute(0, 3, 1, 2),
+            image_tensor.unsqueeze(0),
+            mode='bilinear',
             size=(224, 224),
-            mode="bilinear",
             align_corners=False,
         )
 
-        resized_image = resized_image.squeeze(0).permute(1, 2, 0)
+        resized_image = resized_image.squeeze(0)
 
-        resized_images.append(resized_image.permute(2, 0, 1))
+        resized_images.append(resized_image)
 
     return torch.stack(resized_images)
 
