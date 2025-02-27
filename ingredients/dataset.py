@@ -1141,6 +1141,19 @@ def get_label_names(dataset):
             'wrench',
             'yin_yang'
         ]
+    elif dataset == "stl10":
+        return [
+            'airplane',
+            'bird',
+            'car',
+            'cat',
+            'deer',
+            'dog',
+            'horse',
+            'monkey',
+            'ship',
+            'truck'
+        ]
 
 
 def get_dataset_loaders(dataset, batch_size, n_examples, seed):
@@ -1159,8 +1172,11 @@ def get_dataset_loaders(dataset, batch_size, n_examples, seed):
     elif dataset == "caltech101":
         print(f"Loading CALTECH101 dataset with batch size {batch_size}")
         loaders = get_dataset_loader_caltech101(batch_size, n_examples)
+    elif dataset == "stl10":
+        print(f"Loading STL10 dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_stl10(batch_size, n_examples)
     else:
-        print("Please input a valid dataset (cifar10, imagenet, caltech101)")
+        print("Please input a valid dataset (cifar10, imagenet, caltech101, stl10)")
 
     return loaders
 
@@ -1268,4 +1284,51 @@ def get_dataset_loader_caltech101(batch_size: int, n_examples: int):
 
     dataloaders["class_names"] = caltech101_data.categories
 
+    return dataloaders
+
+
+def get_dataset_loader_stl10(batch_size: int, n_examples: int):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
+
+    image_datasets = {}
+    dataloaders = {}
+    image_datasets["train"] = torchvision.datasets.STL10(
+        root="./data/datasets/", split="train", download=True, transform=transform
+    )
+    dataloaders["train"] = torch.utils.data.DataLoader(
+        image_datasets["train"], batch_size=batch_size, shuffle=False, num_workers=2
+    )
+
+    image_datasets["val"] = torchvision.datasets.STL10(
+        root="./data/datasets/", split="test", download=True, transform=transform
+    )
+    print(f"whole length of the validation set is: {len(image_datasets['val'])}")
+
+    if n_examples > 0:
+        image_datasets["val"] = torch.utils.data.Subset(
+            image_datasets["val"],
+            random.sample(range(1, len(image_datasets["val"])), n_examples),
+        )
+
+    dataloaders["val"] = torch.utils.data.DataLoader(
+        image_datasets["val"], batch_size=batch_size, shuffle=True, num_workers=2
+    )
+
+    class_names = [
+        'airplane',
+        'bird',
+        'car',
+        'cat',
+        'deer',
+        'dog',
+        'horse',
+        'monkey',
+        'ship',
+        'truck']
+    dataloaders["class_names"] = class_names
+
+    torch.cuda.empty_cache()
     return dataloaders

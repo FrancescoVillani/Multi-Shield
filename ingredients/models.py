@@ -142,12 +142,6 @@ _local_imagenet_models = {
                        threat_model=liu2023['threat_model'])
 }
 
-caltech101_resnet18 = {
-    'path': "./pretrained_models/resnet18.model_seed=1123.dataset=caltech101.dataset_seed=1233.pth",
-    'model_type': torchvision.models.resnet18,
-    'new_num_classes': 101
-}
-
 
 def load_local_model(path: str, model_type: str, new_num_classes: int = None, torch_preprocess: torchvision.transforms.Normalize = None) -> nn.Module:
     model = model_type(pretrained=True)
@@ -169,10 +163,32 @@ def load_local_model(path: str, model_type: str, new_num_classes: int = None, to
 
     return model.eval()
 
+
+caltech101_resnet18 = {
+    'path': "./pretrained_models/resnet18.model_seed=1123.dataset=caltech101.dataset_seed=1233.pth",
+    'model_type': torchvision.models.resnet18,
+    'new_num_classes': 101
+}
+
+
 _local_caltech101_models = {
     "caltech101_resnet18": partial(load_local_model, path=caltech101_resnet18["path"],
                                    model_type=caltech101_resnet18["model_type"],
                                    new_num_classes=caltech101_resnet18["new_num_classes"])
+}
+
+
+stl10_resnet18 = {
+    'path': "./pretrained_models/resnet18.model_seed=1123.dataset=stl10.dataset_seed=1233.pth",
+    'model_type': torchvision.models.resnet18,
+    'new_num_classes': 10
+}
+
+
+_local_stl10_models = {
+    "stl10_resnet18": partial(load_local_model, path=stl10_resnet18["path"],
+                                   model_type=stl10_resnet18["model_type"],
+                                   new_num_classes=stl10_resnet18["new_num_classes"])
 }
 
 
@@ -184,6 +200,8 @@ def get_local_model(name: str, dataset: str, torch_preprocess: torchvision.trans
         return _local_imagenet_models[name]()
     elif dataset == 'caltech101':
         return _local_caltech101_models[name](torch_preprocess=torch_preprocess)
+    elif dataset == 'stl10':
+        return _local_stl10_models[name](torch_preprocess=torch_preprocess)
 
 
 class ClipModelConfig:
