@@ -1154,6 +1154,110 @@ def get_label_names(dataset):
             'ship',
             'truck'
         ]
+    elif dataset == "food101":
+        return [
+            'Apple pie',
+            'Baby back ribs',
+            'Baklava',
+            'Beef carpaccio',
+            'Beef tartare',
+            'Beet salad',
+            'Beignets',
+            'Bibimbap',
+            'Bread pudding',
+            'Breakfast burrito',
+            'Bruschetta',
+            'Caesar salad',
+            'Cannoli',
+            'Caprese salad',
+            'Carrot cake',
+            'Ceviche',
+            'Cheesecake',
+            'Cheese plate',
+            'Chicken curry',
+            'Chicken quesadilla',
+            'Chicken wings',
+            'Chocolate cake',
+            'Chocolate mousse',
+            'Churros',
+            'Clam chowder',
+            'Club sandwich',
+            'Crab cakes',
+            'Creme brulee',
+            'Croque madame',
+            'Cup cakes',
+            'Deviled eggs',
+            'Donuts',
+            'Dumplings',
+            'Edamame',
+            'Eggs benedict',
+            'Escargots',
+            'Falafel',
+            'Filet mignon',
+            'Fish and chips',
+            'Foie gras',
+            'French fries',
+            'French onion soup',
+            'French toast',
+            'Fried calamari',
+            'Fried rice',
+            'Frozen yogurt',
+            'Garlic bread',
+            'Gnocchi',
+            'Greek salad',
+            'Grilled cheese sandwich',
+            'Grilled salmon',
+            'Guacamole',
+            'Gyoza',
+            'Hamburger',
+            'Hot and sour soup',
+            'Hot dog',
+            'Huevos rancheros',
+            'Hummus',
+            'Ice cream',
+            'Lasagna',
+            'Lobster bisque',
+            'Lobster roll sandwich',
+            'Macaroni and cheese',
+            'Macarons',
+            'Miso soup',
+            'Mussels',
+            'Nachos',
+            'Omelette',
+            'Onion rings',
+            'Oysters',
+            'Pad thai',
+            'Paella',
+            'Pancakes',
+            'Panna cotta',
+            'Peking duck',
+            'Pho',
+            'Pizza',
+            'Pork chop',
+            'Poutine',
+            'Prime rib',
+            'Pulled pork sandwich',
+            'Ramen',
+            'Ravioli',
+            'Red velvet cake',
+            'Risotto',
+            'Samosa',
+            'Sashimi',
+            'Scallops',
+            'Seaweed salad',
+            'Shrimp and grits',
+            'Spaghetti bolognese',
+            'Spaghetti carbonara',
+            'Spring rolls',
+            'Steak',
+            'Strawberry shortcake',
+            'Sushi',
+            'Tacos',
+            'Takoyaki',
+            'Tiramisu',
+            'Tuna tartare',
+            'Waffles'
+        ]
 
 
 def get_dataset_loaders(dataset, batch_size, n_examples, seed):
@@ -1175,8 +1279,11 @@ def get_dataset_loaders(dataset, batch_size, n_examples, seed):
     elif dataset == "stl10":
         print(f"Loading STL10 dataset with batch size {batch_size}")
         loaders = get_dataset_loader_stl10(batch_size, n_examples)
+    elif dataset == "food101":
+        print(f"Loading FOOD101 dataset with batch size {batch_size}")
+        loaders = get_dataset_loader_food101(batch_size, n_examples)
     else:
-        print("Please input a valid dataset (cifar10, imagenet, caltech101, stl10)")
+        print("Please input a valid dataset (cifar10, imagenet, caltech101, stl10, food101)")
 
     return loaders
 
@@ -1328,6 +1435,144 @@ def get_dataset_loader_stl10(batch_size: int, n_examples: int):
         'monkey',
         'ship',
         'truck']
+    dataloaders["class_names"] = class_names
+
+    torch.cuda.empty_cache()
+    return dataloaders
+
+
+def get_dataset_loader_food101(batch_size: int, n_examples: int):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
+
+    image_datasets = {}
+    dataloaders = {}
+    image_datasets["train"] = torchvision.datasets.Food101(
+        root="./data/datasets/", split="train", download=True, transform=transform
+    )
+    dataloaders["train"] = torch.utils.data.DataLoader(
+        image_datasets["train"], batch_size=batch_size, shuffle=False, num_workers=2
+    )
+
+    image_datasets["val"] = torchvision.datasets.Food101(
+        root="./data/datasets/", split="test", download=True, transform=transform
+    )
+    print(f"whole length of the validation set is: {len(image_datasets['val'])}")
+
+    if n_examples > 0:
+        image_datasets["val"] = torch.utils.data.Subset(
+            image_datasets["val"],
+            random.sample(range(1, len(image_datasets["val"])), n_examples),
+        )
+
+    dataloaders["val"] = torch.utils.data.DataLoader(
+        image_datasets["val"], batch_size=batch_size, shuffle=True, num_workers=2
+    )
+
+    class_names = [
+        'Apple pie',
+        'Baby back ribs',
+        'Baklava',
+        'Beef carpaccio',
+        'Beef tartare',
+        'Beet salad',
+        'Beignets',
+        'Bibimbap',
+        'Bread pudding',
+        'Breakfast burrito',
+        'Bruschetta',
+        'Caesar salad',
+        'Cannoli',
+        'Caprese salad',
+        'Carrot cake',
+        'Ceviche',
+        'Cheesecake',
+        'Cheese plate',
+        'Chicken curry',
+        'Chicken quesadilla',
+        'Chicken wings',
+        'Chocolate cake',
+        'Chocolate mousse',
+        'Churros',
+        'Clam chowder',
+        'Club sandwich',
+        'Crab cakes',
+        'Creme brulee',
+        'Croque madame',
+        'Cup cakes',
+        'Deviled eggs',
+        'Donuts',
+        'Dumplings',
+        'Edamame',
+        'Eggs benedict',
+        'Escargots',
+        'Falafel',
+        'Filet mignon',
+        'Fish and chips',
+        'Foie gras',
+        'French fries',
+        'French onion soup',
+        'French toast',
+        'Fried calamari',
+        'Fried rice',
+        'Frozen yogurt',
+        'Garlic bread',
+        'Gnocchi',
+        'Greek salad',
+        'Grilled cheese sandwich',
+        'Grilled salmon',
+        'Guacamole',
+        'Gyoza',
+        'Hamburger',
+        'Hot and sour soup',
+        'Hot dog',
+        'Huevos rancheros',
+        'Hummus',
+        'Ice cream',
+        'Lasagna',
+        'Lobster bisque',
+        'Lobster roll sandwich',
+        'Macaroni and cheese',
+        'Macarons',
+        'Miso soup',
+        'Mussels',
+        'Nachos',
+        'Omelette',
+        'Onion rings',
+        'Oysters',
+        'Pad thai',
+        'Paella',
+        'Pancakes',
+        'Panna cotta',
+        'Peking duck',
+        'Pho',
+        'Pizza',
+        'Pork chop',
+        'Poutine',
+        'Prime rib',
+        'Pulled pork sandwich',
+        'Ramen',
+        'Ravioli',
+        'Red velvet cake',
+        'Risotto',
+        'Samosa',
+        'Sashimi',
+        'Scallops',
+        'Seaweed salad',
+        'Shrimp and grits',
+        'Spaghetti bolognese',
+        'Spaghetti carbonara',
+        'Spring rolls',
+        'Steak',
+        'Strawberry shortcake',
+        'Sushi',
+        'Tacos',
+        'Takoyaki',
+        'Tiramisu',
+        'Tuna tartare',
+        'Waffles']
     dataloaders["class_names"] = class_names
 
     torch.cuda.empty_cache()
