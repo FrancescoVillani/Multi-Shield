@@ -1406,7 +1406,7 @@ def get_dataset_loader_stl10(batch_size: int, n_examples: int):
         root="./data/datasets/", split="train", download=True, transform=transform
     )
     dataloaders["train"] = torch.utils.data.DataLoader(
-        image_datasets["train"], batch_size=batch_size, shuffle=False, num_workers=2
+        image_datasets["train"], batch_size=batch_size, shuffle=True, num_workers=2
     )
 
     image_datasets["val"] = torchvision.datasets.STL10(
@@ -1421,7 +1421,7 @@ def get_dataset_loader_stl10(batch_size: int, n_examples: int):
         )
 
     dataloaders["val"] = torch.utils.data.DataLoader(
-        image_datasets["val"], batch_size=batch_size, shuffle=True, num_workers=2
+        image_datasets["val"], batch_size=batch_size, shuffle=False, num_workers=2
     )
 
     class_names = [
@@ -1453,7 +1453,7 @@ def get_dataset_loader_food101(batch_size: int, n_examples: int):
         root="./data/datasets/", split="train", download=True, transform=transform
     )
     dataloaders["train"] = torch.utils.data.DataLoader(
-        image_datasets["train"], batch_size=batch_size, shuffle=False, num_workers=2
+        image_datasets["train"], batch_size=batch_size, shuffle=True, num_workers=2
     )
 
     image_datasets["val"] = torchvision.datasets.Food101(
@@ -1468,7 +1468,7 @@ def get_dataset_loader_food101(batch_size: int, n_examples: int):
         )
 
     dataloaders["val"] = torch.utils.data.DataLoader(
-        image_datasets["val"], batch_size=batch_size, shuffle=True, num_workers=2
+        image_datasets["val"], batch_size=batch_size, shuffle=False, num_workers=2
     )
 
     class_names = [
