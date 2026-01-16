@@ -1,0 +1,16 @@
+{
+  "seed": 1233,
+  "experiments": [
+    {
+      "clip_model_id": "clipa_ViT_L",
+      "dataset": "imagenet",
+      "model_name": "liu2023",
+      "n_samples": 100,
+      "batch_size": 16,
+      "attack_parameters": {
+        "epsilon": 4,
+        "verbose": false
+      }
+    }
+  ]
+}
