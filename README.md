@@ -6,9 +6,9 @@
 
 Official implementation of **Multi-Shield**, a novel defense mechanism that leverages multi-modal data (visual and textual) to identify and reject adversarial examples.
 
-📄 **Paper**: [Multi-Shield: Robust Image Classification with Multi-Modal Large Language Models](https://www.sciencedirect.com/science/article/pii/S0167865525001618) (Pattern Recognition Letters, 2025)
+**Paper**: [Multi-Shield: Robust Image Classification with Multi-Modal Large Language Models](https://www.sciencedirect.com/science/article/pii/S0167865525001618) (Pattern Recognition Letters, 2025)
 
-📓 **Quick Start**: Try the [interactive Jupyter notebook](quick_start.ipynb) for a hands-on demo with visualizations!
+**Quick Start**: Try the [interactive Jupyter notebook](quick_start.ipynb) for a hands-on demo.
 
 ---
 
